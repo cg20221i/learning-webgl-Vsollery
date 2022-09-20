@@ -8,10 +8,10 @@ function main() {
     //D (0.0, 1.0) BLACK  (0.0, 0.0, 0.0)
 
     var vertices = [
-      0.5, 0.5, 1.0, 0.0, 0.0,
-      0.0, 0.0, 0.0, 1.0, 0.0,
-      -0.5, 0.5, 0.0, 0.0, 1.0,
-      0.0, 1.0, 0.0, 0.0, 0.0,
+      0.5, 0.0, 1.0, 0.0, 0.0,
+      0.0, -0.5, 0.0, 1.0, 0.0,
+      -0.5, 0.0, 0.0, 0.0, 1.0,
+      0.0, 0.5, 0.0, 0.0, 0.0,
   ];
 
     //Create a linked-list for storing vertices data in GPU
@@ -91,13 +91,22 @@ function main() {
       5 * Float32Array.BYTES_PER_ELEMENT,
       2 * Float32Array.BYTES_PER_ELEMENT);
     gl.enableVertexAttribArray(aColor);
-  
-    const render = () => {
-        gl.clearColor(1.0, 0.75, 0.79, 1.0);
-        theta += 0.01;
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.uniform1f(uTheta,theta);
 
+    var freeze = false;
+    const onMouseClick = (event) =>{
+      freeze = !freeze;
+    }
+    document.addEventListener("click", onMouseClick, false);
+
+       const render = () => {
+        gl.clearColor(1.0, 0.75, 0.79, 1.0);
+        if(freeze){
+          theta += 0.01;
+          gl.uniform1f(uTheta,theta);
+        }
+        
+        gl.clear(gl.COLOR_BUFFER_BIT);
+      
         gl.drawArrays(gl.TRIANGLE_FAN, 0, 4); //mode -> primitive assembly
         requestAnimationFrame(render);
     }
