@@ -2,16 +2,17 @@ function main() {
     var canvas = document.getElementById("myCanvas");
     var gl = canvas.getContext("webgl");
     
-    //A( 0.5, 0.5)
-    //B( 0.0, 0.0)
-    //C(-0.5, 0.5)
+    //A( 0.5, 0.5) RED    (1.0, 0.0, 0.0)
+    //B( 0.0, 0.0) GREEN  (0.0, 1.0, 0.0)
+    //C(-0.5, 0.5) BLUE   (0.0, 0.0, 1.0)
+    //D (0.0, 1.0) BLACK  (0.0, 0.0, 0.0)
 
-    var vertices =[
-        0.5, 0.5, 
-        0.0, 0.0, 
-        -0.5, 0.5,
-        0.0, 1.0
-    ];
+    var vertices = [
+      0.5, 0.5, 1.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 1.0, 0.0,
+      -0.5, 0.5, 0.0, 0.0, 1.0,
+      0.0, 1.0, 0.0, 0.0, 0.0,
+  ];
 
     //Create a linked-list for storing vertices data in GPU
     var buffer = gl.createBuffer();
@@ -21,7 +22,9 @@ function main() {
     //VERTEX SHADER
     var vertexShaderCode = `
       attribute vec2 aPosition;
+      attribute vec3 aColor;
       uniform float uTheta;
+      varying vec3 vColor;
       void main() {
         gl_PointSize = 15.0;
         vec2 position;  vec2(aPosition);
@@ -30,6 +33,7 @@ function main() {
         gl_Position = vec4(position, 0.0, 1.0);
         //gl_Position is the Final destination for storing
         //positional data for the rendered vertex
+        vColor = aColor;
       }
     `;
   
@@ -40,8 +44,9 @@ function main() {
     //FRAGMENT SHADER --> manage color data
     var fragmentShaderCode = `
     precision mediump float;
+    varying vec3 vColor;
     void main() {
-      gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+      gl_FragColor = vec4(vColor, 1.0);
       //gl_FragColor is the final destinatio for storing
       //color data for rendered fragment
       
@@ -67,17 +72,36 @@ function main() {
     //for each vertex being proccesed
 
     var aPosition = gl.getAttribLocation(shaderProgram, "aPosition");
-    gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0,0 )
+    gl.vertexAttribPointer(
+      aPosition, 
+      2, 
+      gl.FLOAT, 
+      false, 
+      5 * Float32Array.BYTES_PER_ELEMENT,
+      0)
     gl.enableVertexAttribArray(aPosition);
+
+    //get Color
+    var aColor = gl.getAttribLocation(shaderProgram, "aColor");
+    gl.vertexAttribPointer(
+      aColor, 
+      3, 
+      gl.FLOAT, 
+      false, 
+      5 * Float32Array.BYTES_PER_ELEMENT,
+      2 * Float32Array.BYTES_PER_ELEMENT);
+    gl.enableVertexAttribArray(aColor);
   
     const render = () => {
-      gl.clearColor(1.0, 0.75, 0.79, 1.0);
-      theta += 0.01;
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.uniform1f(uTheta,theta);
+        gl.clearColor(1.0, 0.75, 0.79, 1.0);
+        theta += 0.01;
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform1f(uTheta,theta);
 
-      gl.drawArrays(gl.TRIANGLE_FAN, 0, 4); //mode -> primitive assembly
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4); //mode -> primitive assembly
+        requestAnimationFrame(render);
     }
-    setInterval(render,1000/60);
+    //setInterval(render,1000/60);
+    requestAnimationFrame(render);
   }
   
