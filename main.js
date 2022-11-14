@@ -357,7 +357,7 @@ function main() {
         glMatrix.mat3.normalFromMat4(normalModel, model);
         gl.uniformMatrix3fv(uNormalModel, false, normalModel);
 
-        gl.drawElements(gl.LINE_LOOP, indices.length, 
+        gl.drawElements(gl.TRIANGLES, indices.length, 
             gl.UNSIGNED_SHORT, 0);
         requestAnimationFrame(render);
     }
